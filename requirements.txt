@@ -1,0 +1,5 @@
+sv_ttk
+file_renamer
+PyPDF2
+Pillow
+fitz
