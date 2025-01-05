@@ -39,8 +39,11 @@ The **File Management Suite** is a Python-based desktop application designed to 
 - **Additional Libraries**:  
   - `os`  
   - `shutil`  
-  - `hashlib`  
-  - `matplotlib` (for visualizing disk usage)  
+  - `psutil`  
+  - `sv_ttk`  
+  - `datetime`  
+  - `hashlib`    
+  - `matplotlib`  
 
 ---
 
@@ -48,5 +51,5 @@ The **File Management Suite** is a Python-based desktop application designed to 
 
 1. Clone the repository:  
    ```bash
-   git clone https://github.com/yourusername/file-management-suite.git
+   git clone https://github.com/jaimik-kadu/file-management-suite.git
    cd file-management-suite
