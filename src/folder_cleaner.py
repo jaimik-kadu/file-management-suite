@@ -3,6 +3,7 @@ import shutil
 from tkinter import filedialog
 from tkinter import ttk
 import tkinter as tk
+import logging
 
 FILE_CATEGORIES = {
     "Images": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".heic"],
@@ -30,6 +31,8 @@ class FolderCleaner:
 
         # Dictionary to store files for each category
         file_summary = {category: [] for category in FILE_CATEGORIES.keys()}
+        skipped_files = []
+        
         # Move files into the appropriate category folders
         for file_name in os.listdir(folder):
             file_path = os.path.join(folder, file_name)
@@ -44,22 +47,28 @@ class FolderCleaner:
                         if not moved and not file_summary[category]:
                             os.makedirs(category_path, exist_ok=True)
 
-                        shutil.move(file_path, category_path)
-                        file_summary[category].append(file_name)
-                        moved = True
+                        try:
+                            shutil.move(file_path, os.path.join(category_path, file_name))
+                            file_summary[category].append(file_name)
+                            moved = True
+                        except (shutil.Error, OSError, PermissionError) as e:
+                            skipped_files.append((file_name, str(e)))
                         break
 
-                if not moved:
+                if not moved and file_name not in [f[0] for f in skipped_files]:
                     # Move to 'Others' folder if no category matches
                     others_path = os.path.join(folder, "Others")
                     if not os.path.exists(others_path):
                         os.makedirs(others_path, exist_ok=True)
-                    shutil.move(file_path, others_path)
-                    file_summary["Others"].append(file_name)
+                    try:
+                        shutil.move(file_path, os.path.join(others_path, file_name))
+                        file_summary["Others"].append(file_name)
+                    except (shutil.Error, OSError, PermissionError) as e:
+                        skipped_files.append((file_name, str(e)))
 
-        self.display_summary(file_summary)
+        self.display_summary(file_summary, skipped_files)
 
-    def display_summary(self, file_summary):
+    def display_summary(self, file_summary, skipped_files=None):
         """Displays the file summary in the content frame with a scrollbar."""
         # Clear any existing widgets in the content frame
         for widget in self.content_frame.winfo_children():
@@ -89,6 +98,12 @@ class FolderCleaner:
                 summary_text += f"\n{category} ({len(files)} files):\n"
                 summary_text += "\n".join(f"  - {file}" for file in files)
                 summary_text += "\n"
+        
+        # Add skipped files to summary
+        if skipped_files and len(skipped_files) > 0:
+            summary_text += f"\nSkipped files ({len(skipped_files)}):\n"
+            summary_text += "\n".join(f"  - {file} (Reason: {reason})" for file, reason in skipped_files)
+            summary_text += "\n"
 
         summary_label = ttk.Label(summary_frame, text=summary_text, anchor="w", justify="left")
         summary_label.grid(row=1, column=0, sticky="nw", padx=10, pady=10)
