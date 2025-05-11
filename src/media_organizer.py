@@ -42,7 +42,7 @@ class MediaCleaner:
                 
                 # Define folder names for year and month
                 year_folder = os.path.join(folder, str(modified_date.year))
-                month_folder = os.path.join(year_folder, modified_date.strftime('%B'))
+                month_folder = os.path.join(year_folder, modified_date.strftime('[%m] %B'))
                 
                 # Create directories if they don't exist
                 os.makedirs(month_folder, exist_ok=True)
